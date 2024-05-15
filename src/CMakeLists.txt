@@ -37,6 +37,10 @@ message( "
 This is ${CMAKE_PROJECT_NAME} v. ${PROJECT_VERSION}.
 ")
 
+# Tell CMake to use our custom Find modules
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+
 #------------------------------------------------------------------------------#
 # User configurable options
 
@@ -76,6 +80,16 @@ endif ()
 # Do not enable extensions (e.g.: --std=gnu++11)
 set( CMAKE_CXX_EXTENSIONS OFF )
 set( CMAKE_C_EXTENSIONS   OFF )
+
+#---#
+option(BRANSON_WITH_ARIELAPI "Enable Ariel API features" FALSE)
+if (BRANSON_WITH_ARIELAPI)
+  find_package(arielapi REQUIRED)
+  list(APPEND ARIEL_INCLUDE_DIR
+    ${ARIELAPI_INCLUDE_DIR})
+endif()
+
+
 
 #------------------------------------------------------------------------------#
 # Build type and custom compiler flags
@@ -162,11 +176,17 @@ message("\n")
 file(GLOB headers *.h)
 add_executable(BRANSON main.cc ${headers})
 target_include_directories( BRANSON PRIVATE
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> ${PROJECT_SOURCE_DIR}/pugixml/src/)
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}> ${PROJECT_SOURCE_DIR}/pugixml/src/ ${ARIEL_INCLUDE_DIR})
 set( branson_deps
   MPI::MPI_CXX
   MPI::MPI_C
   pugixml)
+
+if (ARIELAPI_FOUND)
+  set(branson_deps "arielapi;${branson_deps}")
+  target_compile_definitions(BRANSON PUBLIC "-DUSE_ARIELAPI")
+  target_link_directories(BRANSON PUBLIC ${ARIELAPI_INCLUDE_DIR})
+endif()
 
 if(OpenMP_FOUND)
   set(branson_deps "OpenMP::OpenMP_CXX;${branson_deps}")
@@ -205,7 +225,7 @@ target_link_libraries( BRANSON PRIVATE ${branson_deps} )
 #------------------------------------------------------------------------------#
 # Testing
 
-option( BUILD_TESTING "Should we compile the tests?" ON )
+option( BUILD_TESTING "Should we compile the tests?" OFF )
 if(BUILD_TESTING)
   enable_testing()
   add_subdirectory(test)

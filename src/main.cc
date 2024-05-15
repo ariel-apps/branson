@@ -27,6 +27,10 @@
 #include "replicated_driver.h"
 #include "timer.h"
 
+#ifdef USE_ARIELAPI
+#include <arielapi.h>
+#endif
+
 using Constants::PARTICLE_PASS;
 using Constants::REPLICATED;
 using std::cout;
@@ -101,6 +105,10 @@ int main(int argc, char **argv) {
     // TRT PHYSICS CALCULATION
     //--------------------------------------------------------------------------//
 
+#ifdef USE_ARIELAPI
+    ariel_enable();
+#endif
+
     timers.start_timer("Total non-setup");
 
     if (input.get_dd_mode() == PARTICLE_PASS)
@@ -123,6 +131,10 @@ int main(int argc, char **argv) {
       cout<<"Photons Per Second (FOM): "<<
         imc_state.get_photons_per_second_fom(imc_p.get_n_user_photons())<<endl;
     }
+
+#ifdef USE_ARIELAPI
+    ariel_disable();
+#endif
 
   } // end main loop scope, objects destroyed here
 
