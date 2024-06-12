@@ -108,6 +108,7 @@ int main(int argc, char **argv) {
     //--------------------------------------------------------------------------//
 
 #ifdef USE_ARIELAPI
+    ariel_output_stats();
     ariel_enable();
 #endif
 
@@ -155,6 +156,7 @@ int main(int argc, char **argv) {
     }
 
 #ifdef USE_ARIELAPI
+    ariel_output_stats();
     ariel_disable();
 #endif
 
